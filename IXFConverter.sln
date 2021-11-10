@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31829.152
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IXFConverter", "IXFConverter\IXFConverter.csproj", "{8F7A6562-C470-4691-A3F4-2014F5E22688}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EAA40463-0E1D-47CA-88C9-08089EDB160C}"
+	ProjectSection(SolutionItems) = preProject
+		Command Reference.html = Command Reference.html
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F7A6562-C470-4691-A3F4-2014F5E22688}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F7A6562-C470-4691-A3F4-2014F5E22688}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F7A6562-C470-4691-A3F4-2014F5E22688}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F7A6562-C470-4691-A3F4-2014F5E22688}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C022E6B0-4A81-46B6-992C-D8051595E71B}
+	EndGlobalSection
+EndGlobal

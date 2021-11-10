@@ -1,0 +1,2563 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML 3//EN">
+<!-- saved from url=(0057)https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Command Reference</title>
+<!-- Begin Header Records  ========================================== -->
+<!-- E:\IDWB\TEMP\IDWT1818\DB2N0.SCR converted by idb2h R4.02 (338)   -->
+<!-- ID Workbench Version (OS2) on 25 Jun 1998 at 13:25:02            -->
+<!-- (C) Copyright IBM Corporation, 1998                              -->
+<!-- All rights reserved. Licensed Materials Property of IBM          -->
+<!-- Note to US Government users                                      -->
+<!-- Documentation related to restricted rights                       -->
+<!-- Use, duplication or disclosure is subject to restrictions        -->
+<!-- set forth in GSA ADP Schedule with IBM Corp.                     -->
+<meta http-equiv="updated" content="Thu, 25 Jun 1998 13:25:00">
+<meta http-equiv="review" content="Fri, 25 Jun 1999 13:25:00">
+<meta http-equiv="expires" content="Sun, 25 Jun 2000 13:25:00">
+<style>@media print {#ghostery-purple-box {display:none !important}}</style></head><body bgcolor="#FFFFFF">
+<img src="./Command Reference_files/bannerx.gif" border="0" height="92" width="490" alt="IBM Books"> 
+<br> 
+<!-- End Header Records  ============================================ -->
+<a name="Top_Of_Page"></a>
+<h1>Command Reference</h1>
+<hr>
+<h2><a name="HDRIXF" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_164">PC Version of IXF File Format</a></h2>
+<a name="IDX2167"></a>
+<a name="IDX2168"></a>
+<a name="IDX2169"></a>
+<a name="IDX2170"></a>
+<p>The PC version of IXF (PC/IXF) file format is a database manager
+adaptation of the Integration Exchange Format (IXF) data interchange
+architecture. The IXF architecture was specifically designed to enable
+the exchange of relational database structures and data. The PC/IXF
+architecture allows the database manager to export a database without having
+to anticipate the requirements and idiosyncrasies of a receiving
+product. Similarly, a product importing a PC/IXF file need only
+understand the PC/IXF architecture; the characteristics of the product
+which exported the file are not relevant. The PC/IXF file
+architecture maintains the independence of both the exporting and the
+importing database systems.
+</p><p>The IXF architecture is a generic relational database exchange format that
+supports a rich set of relational data types, including some types that may
+not be supported by specific relational database products. The
+PC/IXF file format preserves this flexibility; for example, the PC/IXF
+architecture supports both single-byte character string (SBCS) and double-byte
+character string (DBCS) data types. Not all implementations support all
+PC/IXF data types; however, even restricted implementations provide for
+the detection and disposition of unsupported data types during import.
+<a name="IDX2171"></a>
+<a name="IDX2172"></a>
+</p><p>In general, a PC/IXF file consists of an unbroken sequence of
+variable-length records. The file contains the following record types
+in the order shown: 
+</p><ul compact="">
+<li>One header record of record type H
+</li><li>One table record of record type T
+</li><li>Multiple column descriptor records of record type C (one record for each
+column in the table)
+</li><li>Multiple data records of record type D (each row in the table is
+represented by one or more D records).
+</li></ul>
+<p>A PC/IXF file may also contain application records of record type A,
+anywhere after the H record. These records are permitted in PC/IXF
+files to enable an application to include additional data, not defined by the
+PC/IXF format, in a PC/IXF file. A records are ignored by any
+program reading a PC/IXF file that does not have particular knowledge
+about the data format and content implied by the application identifier in the
+A record.
+<a name="IDX2173"></a>
+<a name="IDX2174"></a>
+</p><p>Every record in a PC/IXF file begins with a record length
+indicator. This is a 6-byte right justified character representation of
+an integer value specifying the length, in bytes, of the portion of the
+PC/IXF record that follows the record length indicator; that is, the total
+record size minus 6 bytes. Programs reading PC/IXF files should use
+these record lengths to locate the end of the current record and the beginning
+of the next record. H, T, and C records must be sufficiently large to
+include all of their defined fields, and, of course, their record length
+fields must agree with their actual lengths. However, if extra data
+(for example, a <i>new</i> field), is added to the end of one of these
+records, pre-existing programs reading PC/IXF files should ignore the
+extra data, and generate no more than a warning message. Programs
+writing PC/IXF files, however, should write H, T and C records that are
+the precise length needed to contain all of the defined fields.
+</p><p>PC/IXF file records are composed of fields which contain character
+data. The import and export utilities interpret this character data
+using the CPGID of the target database, with two exceptions: 
+</p><ul>
+<p></p><li>The IXFADATA field of A records. 
+<p>The code page environment of character data contained in an IXFADATA field
+is established by the application which creates and processes a particular A
+record; that is, the environment varies by implementation.
+</p><p></p></li><li>The IXFDCOLS field of D records. 
+<p>The code page environment of character data contained in an IXFDCOLS field
+is a function of information contained in the C record which defines a
+particular column and its data.
+</p></li></ul>
+<p>Numeric fields in H, T, and C records, and in the prefix portion of D and A
+records should be right justified single-byte character representations of
+integer values, filled with leading zeros or blanks. A value of zero
+should be indicated with at least one (right justified) zero character, not
+blanks. Whenever one of these numeric fields is not used, for example
+IXFCLENG, where the length is implied by the data type, it should be filled
+with blanks. These numeric fields are:
+</p><p><br>
+</p><pre>   IXFHRECL, IXFTRECL, IXFCRECL, IXFDRECL, IXFARECL,
+   IXFHHCNT, IXFHSBCP, IXFHDBCP, IXFTCCNT, IXFTNAML,
+   IXFCLENG, IXFCDRID, IXFCPOSN, IXFCNAML, IXFCTYPE,
+   IXFCSBCP, IXFCDBCP, IXFCNDIM, IXFCDSIZ, IXFDRID
+</pre><br>
+<table><tbody><tr><td align="LEFT" valign="TOP"><b>Note:</b></td><td align="LEFT" valign="TOP">The database manager PC/IXF file format is not identical to the
+System/370 IXF format (see <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRIXFDEV">Differences between Version 1 PC/IXF and Version 0 System/370 IXF</a>).
+</td></tr></tbody></table>
+<p>
+</p><h3><a name="Header_165" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_165">PC/IXF Record Types</a></h3>
+<a name="IDX2175"></a>
+<a name="IDX2176"></a>
+<p>There are five PC/IXF record types: 
+</p><ul compact="">
+<li>header
+</li><li>table
+</li><li>column descriptor
+</li><li>data
+</li><li>application
+</li></ul>
+<p>Each PC/IXF record type is defined as a sequence of fields; these
+fields are required, and must appear in the order shown.
+<a name="IDX2177"></a>
+<a name="IDX2178"></a>
+<a name="IDX2179"></a>
+</p><p><br>
+<table border=""><tbody><tr><td><br>
+<pre>HEADER RECORD
+ 
+   FIELD NAME     LENGTH    TYPE        COMMENTS
+   ----------     -------   ---------   -------------
+   IXFHRECL       06-BYTE   CHARACTER   record length
+   IXFHRECT       01-BYTE   CHARACTER   record type = 'H'
+   IXFHID         03-BYTE   CHARACTER   IXF identifier
+   IXFHVERS       04-BYTE   CHARACTER   IXF version
+   IXFHPROD       12-BYTE   CHARACTER   product
+   IXFHDATE       08-BYTE   CHARACTER   date written
+   IXFHTIME       06-BYTE   CHARACTER   time written
+   IXFHHCNT       05-BYTE   CHARACTER   heading record count
+   IXFHSBCP       05-BYTE   CHARACTER   single byte code page
+   IXFHDBCP       05-BYTE   CHARACTER   double byte code page
+   IXFHFIL1       02-BYTE   CHARACTER   reserved
+</pre><br>
+</td></tr></tbody></table>
+</p><p>The following fields are contained in the header record: 
+</p><dl>
+<p></p><dt><b>IXFHRECL
+</b></dt><dd>The record length indicator. A 6-byte character representation of
+an integer value specifying the length, in bytes, of the portion of the
+PC/IXF record that follows the record length indicator; that is, the total
+record size minus 6 bytes. The H record must be sufficiently long to
+include all of its defined fields.
+<p></p></dd><dt><b>IXFHRECT
+</b></dt><dd>The IXF record type, which is set to H for this record.
+<p></p></dd><dt><b>IXFHID
+</b></dt><dd>The file format identifier, which is set to IXF for this file.
+<p></p></dd><dt><b>IXFHVERS
+</b></dt><dd>The PC/IXF format level used when the file was created, which is set
+to '0001'.
+<p></p></dd><dt><b>IXFHPROD
+</b></dt><dd>A field that can be used by the program creating the file to identify
+itself. If this field is filled in, the first six bytes are used to
+identify the product creating the file, and the last six bytes are used to
+indicate the version or release of the creating product. The database
+manager uses this field to signal the existence of database manager-specific
+data.
+<p></p></dd><dt><b>IXFHDATE
+</b></dt><dd>The date on which the file was written, in the form
+<i>yyyymmdd</i>.
+<p></p></dd><dt><b>IXFHTIME
+</b></dt><dd>The time at which the file was written, in the form
+<i>hhmmss</i>. This field is optional and can be left blank.
+<p></p></dd><dt><b>IXFHHCNT
+</b></dt><dd>The number of H, T, and C records in this file that precede the first data
+record. A records are not included in this count.
+<p></p></dd><dt><b>IXFHSBCP
+</b></dt><dd>Single-byte code page field, containing a single-byte character
+representation of a SBCS CPGID or '00000'. 
+<p>The export utility sets this field equal to the SBCS CPGID of the exported
+database table. For example, if the table SBCS CPGID is 850, this field
+contains '00850'.
+</p><p></p></dd><dt><b>IXFHDBCP
+</b></dt><dd>Double-byte code page field, containing a single-byte character
+representation of a DBCS CPGID or '00000'. 
+<p>The export utility sets this field equal to the DBCS CPGID of the exported
+database table. For example, if the table DBCS CPGID is 301, this field
+contains '00301'.
+</p><p></p></dd><dt><b>IXFHFIL1
+</b></dt><dd>Spare field set to two blanks to match a reserved field in host IXF
+files.
+</dd></dl>
+<a name="IDX2180"></a>
+<a name="IDX2181"></a>
+<a name="IDX2182"></a>
+<p><br>
+<table border=""><tbody><tr><td><br>
+<pre>TABLE RECORD
+ 
+   FIELD NAME     LENGTH    TYPE        COMMENTS
+   ----------     -------   ---------   -------------
+   IXFTRECL       06-BYTE   CHARACTER   record length
+   IXFTRECT       01-BYTE   CHARACTER   record type = 'T'
+   IXFTNAML       02-BYTE   CHARACTER   name length
+   IXFTNAME       18-BYTE   CHARACTER   name of data
+   IXFTQUAL       08-BYTE   CHARACTER   qualifier
+   IXFTSRC        12-BYTE   CHARACTER   data source
+   IXFTDATA       01-BYTE   CHARACTER   data convention = 'C'
+   IXFTFORM       01-BYTE   CHARACTER   data format = 'M'
+   IXFTMFRM       05-BYTE   CHARACTER   machine format='PC'
+   IXFTLOC        01-BYTE   CHARACTER   data location = 'I'
+   IXFTCCNT       05-BYTE   CHARACTER   'C' record count
+   IXFTFIL1       02-BYTE   CHARACTER   reserved
+   IXFTDESC       30-BYTE   CHARACTER   data description
+</pre><br>
+</td></tr></tbody></table>
+</p><p>The following fields are contained in the table record: 
+</p><dl>
+<p></p><dt><b>IXFTRECL
+</b></dt><dd>The record length indicator. A 6-byte character representation of
+an integer value specifying the length, in bytes, of the portion of the
+PC/IXF record that follows the record length indicator; that is, the total
+record size minus 6 bytes. The T record must be sufficiently long to
+include all of its defined fields.
+<p></p></dd><dt><b>IXFTRECT
+</b></dt><dd>The IXF record type, which is set to T for this record.
+<p></p></dd><dt><b>IXFTNAML
+</b></dt><dd>The length, in bytes, of the table name in the IXFTNAME field.
+<p></p></dd><dt><b>IXFTNAME
+</b></dt><dd>The name of the table. If each file has only one table, this is an
+informational field only. The database manager does not use this field
+when importing data. When writing a PC/IXF file, the database
+manager writes the DOS file name (and possibly path information) to this
+field.
+<p></p></dd><dt><b>IXFTQUAL
+</b></dt><dd>Table name qualifier, which identifies the creator of a table in a
+relational system. This is an informational field only. If a
+program writing a file has no data to write to this field, the preferred fill
+value is blanks. Programs reading a file may print or display this
+field, or store it in an informational field, but no computations should
+depend on the content of this field.
+<p></p></dd><dt><b>IXFTSRC
+</b></dt><dd>Used to indicate the original source of the data. This is an
+informational field only. If a program writing a file has no data to
+write to this field, the preferred fill value is blanks. Programs
+reading a file may print or display this field, or store it in an
+informational field, but no computations should depend on the content of this
+field.
+<p></p></dd><dt><b>IXFTDATA
+</b></dt><dd>Convention used to describe the data. This field must be set to
+<tt>C</tt> for import and export, indicating that individual column
+attributes are described in the following column descriptor (C) records, and
+that data follows PC/IXF conventions.
+<p></p></dd><dt><b>IXFTFORM
+</b></dt><dd>Convention used to store numeric data. This field must be set to
+<tt>M</tt>, indicating that numeric data in the data (D) records is stored
+in the machine (internal) format specified by the IXFTMFRM field.
+<p></p></dd><dt><b>IXFTMFRM
+</b></dt><dd>The format of any machine data in the PC/IXF file. The database
+manager will only read or write files if this field is set to
+<tt>PC</tt><i>bbb</i>, where <i>b</i> represents a blank, and PC
+specifies that data in the PC/IXF file is in IBM PC machine format.
+<p></p></dd><dt><b>IXFTLOC
+</b></dt><dd>The location of the data. The database manager only supports a
+value of I, meaning the data is internal to this file.
+<p></p></dd><dt><b>IXFTCCNT
+</b></dt><dd>The number of C records in this table. It is a right-justified
+character representation of an integer value.
+<p></p></dd><dt><b>IXFTFIL1
+</b></dt><dd>Spare field set to two blanks to match a reserved field in host IXF
+files.
+<p></p></dd><dt><b>IXFTDESC
+</b></dt><dd>Descriptive data about the table. This is an informational field
+only. If a program writing a file has no data to write to this field,
+the preferred fill value is blanks. Programs reading a file may print
+or display this field, or store it in an informational field, but no
+computations should depend on the content of this field. This field
+contains <tt>NOT NULL WITH DEFAULT</tt> if the column was not null with
+default, and the table name came from a workstation database.
+</dd></dl>
+<a name="IDX2183"></a>
+<a name="IDX2184"></a>
+<a name="IDX2185"></a>
+<p><br>
+<table border=""><tbody><tr><td><br>
+<pre>COLUMN DESCRIPTOR RECORD
+ 
+   FIELD NAME     LENGTH    TYPE        COMMENTS
+   ----------     -------   ---------   -------------
+   IXFCRECL       06-BYTE   CHARACTER   record length
+   IXFCRECT       01-BYTE   CHARACTER   record type = 'C'
+   IXFCNAML       02-BYTE   CHARACTER   column name length
+   IXFCNAME       18-BYTE   CHARACTER   column name
+   IXFCNULL       01-BYTE   CHARACTER   column allows nulls
+   IXFCSLCT       01-BYTE   CHARACTER   column selected flag
+   IXFCKEY        01-BYTE   CHARACTER   key column flag
+   IXFCCLAS       01-BYTE   CHARACTER   data class
+   IXFCTYPE       03-BYTE   CHARACTER   data type
+   IXFCSBCP       05-BYTE   CHARACTER   single byte code page
+   IXFCDBCP       05-BYTE   CHARACTER   double byte code page
+   IXFCLENG       05-BYTE   CHARACTER   column data length
+   IXFCDRID       03-BYTE   CHARACTER   'D' record identifier
+   IXFCPOSN       06-BYTE   CHARACTER   column position
+   IXFCDESC       30-BYTE   CHARACTER   column description
+   IXFCNDIM       02-BYTE   CHARACTER   number of dimensions
+   IXFCDSIZ       varying   CHARACTER   size of each dimension
+</pre><br>
+</td></tr></tbody></table>
+</p><p>The following fields are contained in column descriptor records: 
+</p><dl>
+<p></p><dt><b>IXFCRECL
+</b></dt><dd>The record length indicator. A 6-byte character representation of
+an integer value specifying the length, in bytes, of the portion of the
+PC/IXF record that follows the record length indicator; that is, the total
+record size minus 6 bytes. The C record must be sufficiently long to
+include all of its defined fields.
+<p></p></dd><dt><b>IXFCRECT
+</b></dt><dd>The IXF record type, which is set to C for this record.
+<p></p></dd><dt><b>IXFCNAML
+</b></dt><dd>The length, in bytes, of the column name in the IXFCNAME field.
+<p></p></dd><dt><b>IXFCNAME
+</b></dt><dd>The name of the column.
+<p></p></dd><dt><b>IXFCNULL
+</b></dt><dd>Specifies if nulls are permitted in this column. Valid settings are
+<tt>Y</tt> or <tt>N</tt>.
+<p></p></dd><dt><b>IXFCSLCT
+</b></dt><dd>An obsolete field whose intended purpose was to allow selection of a
+subset of columns in the data. Programs writing PC/IXF files should
+always store a Y in this field. Programs reading PC/IXF files
+should ignore the field.
+<p></p></dd><dt><b>IXFCKEY
+</b></dt><dd>The key indicator. If the value of this field is <tt>Y</tt>, the
+column is a key column; if the value is <tt>N</tt>, the column is not a key
+column. The database manager does not use this field. It ignores
+the field when importing data, and sets it to <tt>N</tt> when generating an
+export file.
+<p></p></dd><dt><b>IXFCCLAS
+</b></dt><dd>The class of data types to be used in the IXFCTYPE field. The
+database manager only supports relational types (<tt>R</tt>).
+<p></p></dd><dt><b>IXFCTYPE
+</b></dt><dd>The data type for the column. For more information about data
+types, see <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRIXFDT">PC/IXF Data Types</a>.
+<p></p></dd><dt><b>IXFCSBCP
+</b></dt><dd>Contains a single-byte character representation of a SBCS CPGID.
+This field specifies the CPGID for single-byte character data, which occurs
+with the IXFDCOLS field of the D records for this column. 
+<p>The semantics of this field vary with the data type for the column
+(specified in the IXFCTYPE field). 
+</p><ul compact="">
+<li>For a character string column, this field should normally contain a
+nonzero value equal to that of the IXFHSBCP field in the H record; however,
+other values are permitted. If this value is zero, the column is
+interpreted to contain bit string data.
+</li><li>For a numeric column, this field is not meaningful. It is set to
+zero by the export utility, and ignored by the import utility.
+</li><li>For a date or time column, this field is not meaningful. It is set
+to the value of the IXFHSBCP field by the export utility, and ignored by the
+import utility.
+</li><li>For a graphic column, this field must be zero.
+</li></ul>
+<p>See also <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#TBLTABUFF1">Table 12</a>.
+</p><p></p></dd><dt><b>IXFCDBCP
+</b></dt><dd>Contains a single-byte character representation of a DBCS CPGID.
+This field specifies the CPGID for double-byte character data, which occurs
+with the IXFDCOLS field of the D records for this column. 
+<p>The semantics of this field vary with the data type for the column
+(specified in the IXFCTYPE field). 
+</p><ul compact="">
+<li>For a character string column, this field should either be zero, or
+contain a value equal to that of the IXFHDBCP field in the H record; however,
+other values are permitted. If the value in the IXFCSBCP field is zero,
+the value in this field must be zero.
+</li><li>For a numeric column, this field is not meaningful. It is set to
+zero by the export utility, and ignored by the import utility.
+</li><li>For a date or time column, this field is not meaningful. It is set
+to zero by the export utility, and ignored by the import utility.
+</li><li>For a graphic column, this field must have a value equal to the value of
+the IXFHDBCP field.
+</li></ul>
+<p>See also <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#TBLTABUFF1">Table 12</a>.
+</p><p></p></dd><dt><b>IXFCLENG
+</b></dt><dd>Provides information about the size of the column being described.
+For some data types, this field is unused, and should contain blanks.
+For other data types, this field contains the right-justified character
+representation of an integer specifying the column length. For yet
+other data types, this field is divided into two subfields: 3 bytes for
+precision, and 2 bytes for scale; both of these subfields are right-justified
+character representations of integers.
+<p></p></dd><dt><b>IXFCDRID
+</b></dt><dd>The D record identifier. This field contains the right-justified
+character representation of an integer value. Several D records can be
+used to contain each row of data in the PC/IXF file. This field
+specifies which D record (of the several D records contributing to a row of
+data) contains the data for the column. A value of one (for example,
+<tt>001</tt>) indicates that the data for a column is in the first D record
+in a row of data. The first C record must have an IXFCDRID value of
+one. All subsequent C records must have an IXFCDRID value equal to the
+value in the preceding C record, or one higher.
+<p></p></dd><dt><b>IXFCPOSN
+</b></dt><dd>The value in this field is used to locate the data for the column within
+one of the D records representing a row of table data. It is the
+starting position of the data for this column within the IXFDCOLS field of the
+D record. If the column is nullable, IXFCPOSN points to the null
+indicator; otherwise, it points to the data itself. If a column
+contains varying length data, the data itself begins with the current length
+indicator. The IXFCPOSN value for the first byte in the IXFDCOLS field
+of the D record is one (not zero). If a column is in a new D record,
+the value of IXFCPOSN should be one; otherwise, IXFCPOSN values should
+increase from column to column to such a degree that the data values do not
+overlap.
+<p></p></dd><dt><b>IXFCDESC
+</b></dt><dd>Descriptive information about the column. This is an informational
+field only. If a program writing to a file has no data to write to this
+field, the preferred fill value is blanks. Programs reading a file may
+print or display this field, or store it in an informational field, but no
+computations should depend on the content of this field. If 
+<ul compact="">
+<li>the column is not null with default
+</li><li>the table resides in a workstation database
+</li><li>the select statement on the export is of the form <tt>select * from
+table</tt>
+</li></ul>
+<p>
+</p><p>the export utility will put <tt>NOT NULL WITH DEFAULT</tt> in this field,
+and when the import utility creates a new table with this file, it will create
+it as not null with default.
+</p><p></p></dd><dt><b>IXFCNDIM
+</b></dt><dd>The number of dimensions in the column. Arrays are not supported in
+this version of PC/IXF. This field must therefore contain a
+character representation of a zero integer value.
+<p></p></dd><dt><b>IXFCDSIZ
+</b></dt><dd>The size or range of each dimension. The length of this field is
+five bytes per dimension. Since arrays are not supported (that is, the
+number of dimensions must be zero), this field has zero length, and does not
+actually exist.
+</dd></dl>
+<a name="IDX2186"></a>
+<a name="IDX2187"></a>
+<a name="IDX2188"></a>
+<p><br>
+<table border=""><tbody><tr><td><br>
+<pre>DATA RECORD
+ 
+   FIELD NAME     LENGTH    TYPE        COMMENTS
+   ----------     -------   ---------   -------------
+   IXFDRECL       06-BYTE   CHARACTER   record length
+   IXFDRECT       01-BYTE   CHARACTER   record type = 'D'
+   IXFDRID        03-BYTE   CHARACTER   'D' record identifier
+   IXFDFIL1       04-BYTE   CHARACTER   reserved
+   IXFDCOLS       varying   variable    columnar data
+</pre><br>
+</td></tr></tbody></table>
+</p><p>The following fields are contained in the data records: 
+</p><dl>
+<p></p><dt><b>IXFDRECL
+</b></dt><dd>The record length indicator. A 6-byte character representation of
+an integer value specifying the length, in bytes, of the portion of the
+PC/IXF record that follows the record length indicator; that is, the total
+record size minus 6 bytes. Each D record must be sufficiently long to
+include all significant data for the current occurrence of the last data
+column stored in the record.
+<p></p></dd><dt><b>IXFDRECT
+</b></dt><dd>The IXF record type, which is set to D for this record, indicating that it
+contains data values for the table.
+<p></p></dd><dt><b>IXFDRID
+</b></dt><dd>The record identifier, which identifies a particular D record within the
+sequence of several D records contributing to a row of data. For the
+first D record in a row of data, this field has a value of one; for the second
+D record in a row of data, this field has a value of two, and so on. In
+each row of data, all the D record identifiers called out in the C records
+must actually exist.
+<p></p></dd><dt><b>IXFDFIL1
+</b></dt><dd>Spare field set to four blanks to match reserved fields, and hold a place
+for a possible shift-out character, in host IXF files.
+<p></p></dd><dt><b>IXFDCOLS
+</b></dt><dd>The area for columnar data. The data area of a data record (D
+record) is composed of one or more column entries. There is one column
+entry for each column descriptor record, which has the same D record
+identifier as the D record. In the D record, the starting position of
+the column entries is indicated by the IXFCPOSN value in the C records.
+<p>
+</p><p>The format of the column entry data depends on whether or not the column is
+nullable: 
+</p><ul compact="">
+<li>If the column is nullable (the IXFCNULL field is set to <tt>Y</tt>), the
+column entry data includes a null indicator. If the column is not null,
+the indicator is followed by data type-specific information, including the
+actual database value. The null indicator is a two-byte value set to
+x'0000' for not null, and x'FFFF' for null.
+</li><li>If the column is not nullable, the column entry data includes only data
+type-specific information, including the actual database value.
+</li></ul>
+<p>For varying-length data types, the data type-specific information includes
+a current length indicator. The current length indicators are 2-byte
+integers in a form specified by the IXFTMFRM field. 
+</p><p>The length of the data area of a D record may not exceed 32&nbsp;771
+bytes.
+</p></dd></dl>
+<a name="IDX2189"></a>
+<a name="IDX2190"></a>
+<a name="IDX2191"></a>
+<p><br>
+<table border=""><tbody><tr><td><br>
+<pre>APPLICATION RECORD
+ 
+   FIELD NAME     LENGTH    TYPE        COMMENTS
+   ----------     -------   ---------   -------------
+   IXFARECL       06-BYTE   CHARACTER   record length
+   IXFARECT       01-BYTE   CHARACTER   record type = 'A'
+   IXFAPPID       12-BYTE   CHARACTER   application identifier
+   IXFADATA       varying   variable    application-specific data
+</pre><br>
+</td></tr></tbody></table>
+</p><p>The following fields are contained in application records: 
+</p><dl>
+<p></p><dt><b>IXFARECL
+</b></dt><dd>The record length indicator. A 6-byte character representation of
+an integer value specifying the length, in bytes, of the portion of the
+PC/IXF record that follows the record length indicator; that is, the total
+record size minus 6 bytes. Each A record must be sufficiently long to
+include at least the entire IXFAPPID field.
+<p></p></dd><dt><b>IXFARECT
+</b></dt><dd>The IXF record type, which is set to A for this record, indicating that
+this is an application record. These records are ignored by programs
+which do not have particular knowledge about the content and the format of the
+data implied by the application identifier.
+<p></p></dd><dt><b>IXFAPPID
+</b></dt><dd>The application identifier, which identifies the application creating the
+A record. PC/IXF files created by the database manager may have A
+records with the first 6 characters of this field set to a constant
+identifying the database manager, and the last 6 characters identifying the
+release or version of the database manager or another application writing the
+A record.
+<p></p></dd><dt><b>IXFADATA
+</b></dt><dd>This field contains application dependent supplemental data, whose form
+and content are known only to the program creating the A record, and to other
+applications which are likely to process the A record.
+</dd></dl>
+<p></p><p>
+</p><p>
+</p><h3><a name="HDRIXFDT" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_166">PC/IXF Data Types</a></h3>
+<a name="IDX2192"></a>
+<a name="IDX2193"></a>
+<br>
+<p><b><a name="Table_11">Table 11. PC/IXF Data Types</a></b><br>
+<table border="">
+<tbody><tr>
+<th align="LEFT" valign="BOTTOM">Name
+</th><th align="LEFT" valign="BOTTOM">IXFCTYPE Value
+</th><th align="LEFT" valign="BOTTOM">Description
+</th></tr><tr>
+<td align="LEFT" valign="TOP">BIGINT
+</td><td align="LEFT" valign="TOP">492
+</td><td align="LEFT" valign="TOP">An 8-byte integer in the form specified by IXFTMFRM. It represents
+a whole number between
+-9&nbsp;223&nbsp;372&nbsp;036&nbsp;854&nbsp;775&nbsp;808
+and
+9&nbsp;223&nbsp;372&nbsp;036&nbsp;854&nbsp;775&nbsp;807.
+IXFCSBCP and IXFCDBCP are not significant , and should be zero.
+IXFCLENG is not used, and should contain blanks.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">BLOB, CLOB
+</td><td align="LEFT" valign="TOP">404, 408
+</td><td align="LEFT" valign="TOP">A variable-length character string. The maximum length of the
+string is contained in the IXFCLENG field of the column descriptor record, and
+cannot exceed 32&nbsp;767 bytes. The string itself is preceded by
+a current length indicator, which is a 4-byte integer specifying the length of
+the string, in bytes. The string is in the code page indicated by
+IXFCSBCP. 
+<p>The following applies to BLOBs only: If IXFCSBCP is zero, the string
+is bit data, and should not be translated by any transformation
+program. 
+</p><p>The following applies to CLOBs only: If IXFCDBCP is nonzero, the
+string can also contain double-byte characters in the code page indicated by
+IXFCDBCP.
+</p></td></tr><tr>
+<td align="LEFT" valign="TOP">BLOB_FILE, CLOB_FILE, DBCLOB_FILE
+</td><td align="LEFT" valign="TOP">804, 808, 812
+</td><td align="LEFT" valign="TOP">A fixed-length field containing an SQLFILE structure with the
+<i>name_length</i> and the <i>name</i> fields filled in. The
+length of the structure is contained in the IXFCLENG field of the column
+descriptor record, and cannot exceed 255 bytes. The file name is in the
+code page indicated by IXFCSBCP. If IXFCDBCP is nonzero, the file name
+can also contain double-byte characters in the code page indicated by
+IXFCDBCP. If IXFCSBCP is zero, the file name is bit data and should not
+be translated by any transformation program. 
+<p>Since the length of the structure is stored in IXFCLENG, the actual length
+of the original LOB is lost. IXF files with columns of type BLOB_FILE,
+CLOB_FILE, or DBCLOB_FILE should not be used to recreate the LOB field, since
+the LOB will be created with a length of
+<i>sql_lobfile_len</i>.
+</p></td></tr><tr>
+<td align="LEFT" valign="TOP">CHAR
+</td><td align="LEFT" valign="TOP">452
+</td><td align="LEFT" valign="TOP">A fixed-length character string. The string length is contained in
+the IXFCLENG field of the column descriptor record, and cannot exceed 254
+bytes. The string is in the code page indicated by IXFCSBCP. If
+IXFCDBCP is nonzero, the string can also contain double-byte characters in the
+code page indicated by IXFCDBCP. If IXFCSBCP is zero, the string is bit
+data and should not be translated by any transformation program.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">DATE
+</td><td align="LEFT" valign="TOP">384
+</td><td align="LEFT" valign="TOP">A point in time in accordance with the Gregorian calendar. Each
+date is a 10-byte character string in International Standards Organization
+(ISO) format: <i>yyyy-mm-dd</i>. The range of the year part
+is <tt>0001</tt> to <tt>9999</tt>. The range of the month part is
+<tt>01</tt> to <tt>12</tt>. The range of the day part is
+<tt>01</tt> to <i>n</i>, where <i>n</i> depends on the month, using
+the usual rules for days of the month and leap year. Leading zeros
+cannot be omitted from any part. IXFCLENG is not used, and should
+contain blanks. Valid characters within DATE are invariant in all PC
+ASCII code pages; therefore, IXFCSBCP and IXFCDBCP are not significant, and
+should be zero.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">DBCLOB
+</td><td align="LEFT" valign="TOP">412
+</td><td align="LEFT" valign="TOP">A variable-length string of double-byte characters. The IXFCLENG
+field in the column descriptor record specifies the maximum number of
+double-byte characters in the string, and cannot exceed
+16&nbsp;383. The string itself is preceded by a current length
+indicator, which is a 4-byte integer specifying the length of the string in
+double-byte characters (that is, the value of this integer is one half the
+length of the string, in bytes). The string is in the DBCS code page,
+as specified by IXFCDBCP in the C record. Since the string consists of
+double-byte character data only, IXFCSBCP should be zero. There are no
+surrounding shift-in or shift-out characters.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">DECIMAL
+</td><td align="LEFT" valign="TOP">484
+</td><td align="LEFT" valign="TOP">A packed decimal number with precision P (as specified by the first three
+bytes of IXFCLENG in the column descriptor record) and scale S (as specified
+by the last two bytes of IXFCLENG). The length, in bytes, of a packed
+decimal number is (P+2)/2. The precision must be an odd number between
+1 and 31, inclusive. The packed decimal number is in the internal
+format specified by IXFTMFRM, where packed decimal for the PC is defined to be
+the same as packed decimal for the System/370. IXFCSBCP and
+IXFCDBCP are not significant, and should be zero.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">FLOATING POINT
+</td><td align="LEFT" valign="TOP">480
+</td><td align="LEFT" valign="TOP">Either a long (8-byte) or short (4-byte) floating point number, depending
+on whether IXFCLENG is set to eight or to four. The data is in the
+internal machine form, as specified by IXFTMFRM. IXFCSBCP and IXFCDBCP
+are not significant, and should be zero. Four-byte floating point is
+not supported by the database manager.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">GRAPHIC
+</td><td align="LEFT" valign="TOP">468
+</td><td align="LEFT" valign="TOP">A fixed-length string of double-byte characters. The IXFCLENG
+field in the column descriptor record specifies the number of double-byte
+characters in the string, and cannot exceed 127. The actual length of
+the string is twice the value of the IXFCLENG field, in bytes. The
+string is in the DBCS code page, as specified by IXFCDBCP in the C
+record. Since the string consists of double-byte character data only,
+IXFCSBCP should be zero. There are no surrounding shift-in or shift-out
+characters.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">INTEGER
+</td><td align="LEFT" valign="TOP">496
+</td><td align="LEFT" valign="TOP">A 4-byte integer in the form specified by IXFTMFRM. It represents
+a whole number between -2&nbsp;147&nbsp;483&nbsp;648 and
++2&nbsp;147&nbsp;483&nbsp;647. IXFCSBCP and IXFCDBCP are
+not significant, and should be zero. IXFCLENG is not used, and should
+contain blanks.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">LONGVARCHAR
+</td><td align="LEFT" valign="TOP">456
+</td><td align="LEFT" valign="TOP">A variable-length character string. The maximum length of the
+string is contained in the IXFCLENG field of the column descriptor record, and
+cannot exceed 32&nbsp;767 bytes. The string itself is preceded by
+a current length indicator, which is a 2-byte integer specifying the length of
+the string, in bytes. The string is in the code page indicated by
+IXFCSBCP. If IXFCDBCP is nonzero, the string can also contain
+double-byte characters in the code page indicated by IXFCDBCP. If
+IXFCSBCP is zero, the string is bit data and should not be translated by any
+transformation program.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">LONG VARGRAPHIC
+</td><td align="LEFT" valign="TOP">472
+</td><td align="LEFT" valign="TOP">A variable-length string of double-byte characters. The IXFCLENG
+field in the column descriptor record specifies the maximum number of
+double-byte characters for the string, and cannot exceed
+16&nbsp;383. The string itself is preceded by a current length
+indicator, which is a 2-byte integer specifying the length of the string in
+double-byte characters (that is, the value of this integer is one half the
+length of the string, in bytes). The string is in the DBCS code page,
+as specified by IXFCDBCP in the C record. Since the string consists of
+double-byte character data only, IXFCSBCP should be zero. There are no
+surrounding shift-in or shift-out characters.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">SMALLINT
+</td><td align="LEFT" valign="TOP">500
+</td><td align="LEFT" valign="TOP">A 2-byte integer in the form specified by IXFTMFRM. It represents
+a whole number between -32&nbsp;768 and
++32&nbsp;767. IXFCSBCP and IXFCDBCP are not significant, and
+should be zero. IXFCLENG is not used, and should contain blanks.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">TIME
+</td><td align="LEFT" valign="TOP">388
+</td><td align="LEFT" valign="TOP">A point in time in accordance with the 24-hour clock. Each time is
+an 8-byte character string in ISO format:
+<i>hh.mm.ss</i>. The range of the hour part is
+<tt>00</tt> to <tt>24</tt>, and the range of the other parts is
+<tt>00</tt> to <tt>59</tt>. If the hour is <tt>24</tt>, the other
+parts are <tt>00</tt>. The smallest time is
+<tt>00.00.00</tt>, and the largest is
+<tt>24.00.00</tt>. Leading zeros cannot be omitted from
+any part. IXFCLENG is not used, and should contain blanks. Valid
+characters within TIME are invariant in all PC ASCII code pages; therefore,
+IXFCSBCP and IXFCDBCP are not significant, and should be zero.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">TIMESTAMP
+</td><td align="LEFT" valign="TOP">392
+</td><td align="LEFT" valign="TOP">The date and time with microsecond precision. Each time stamp is a
+character string of the form
+<i>yyyy-mm-dd-hh.mm.ss.nnnnnn</i> (year month day
+hour minutes seconds microseconds). IXFCLENG is not used, and should
+contain blanks. Valid characters within TIMESTAMP are invariant in all
+PC ASCII code pages; therefore, IXFCSBCP and IXFCDBCP are not significant, and
+should be zero.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">VARCHAR
+</td><td align="LEFT" valign="TOP">448
+</td><td align="LEFT" valign="TOP">A variable-length character string. The maximum length of the
+string, in bytes, is contained in the IXFCLENG field of the column descriptor
+record, and cannot exceed 254 bytes. The string itself is preceded by a
+current length indicator, which is a two-byte integer specifying the length of
+the string, in bytes. The string is in the code page indicated by
+IXFCSBCP. If IXFCDBCP is nonzero, the string can also contain
+double-byte characters in the code page indicated by IXFCDBCP. If
+IXFCSBCP is zero, the string is bit data and should not be translated by any
+transformation program.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">VARGRAPHIC
+</td><td align="LEFT" valign="TOP">464
+</td><td align="LEFT" valign="TOP">A variable-length string of double-byte characters. The IXFCLENG
+field in the column descriptor record specifies the maximum number of
+double-byte characters in the string, and cannot exceed 127. The string
+itself is preceded by a current length indicator, which is a 2-byte integer
+specifying the length of the string in double-byte characters (that is, the
+value of this integer is one half the length of the string, in bytes).
+The string is in the DBCS code page, as specified by IXFCDBCP in the C
+record. Since the string consists of double-byte character data only,
+IXFCSBCP should be zero. There are no surrounding shift-in or shift-out
+characters.
+</td></tr></tbody></table>
+</p><p>Not all combinations of IXFCSBCP and IXFCDBCP values for PC/IXF
+character or graphic columns are valid. A PC/IXF character or
+graphic column with an invalid (IXFCSBCP,IXFCDBCP) combination is an invalid
+data type.
+<a name="IDX2194"></a>
+<a name="IDX2195"></a>
+<a name="IDX2196"></a>
+<a name="IDX2197"></a>
+<br>
+</p><p><b><a name="TBLTABUFF1">Table 12. Valid PC/IXF Data Types</a></b><br>
+<table border="">
+<tbody><tr>
+<th align="LEFT" valign="BOTTOM">PC/IXF Data Type
+</th><th align="CENTER" valign="BOTTOM">Valid (IXFCSBCP,IXFCDBCP) Pairs
+</th><th align="CENTER" valign="BOTTOM">Invalid (IXFCSBCP,IXFCDBCP) Pairs
+</th></tr><tr>
+<td align="LEFT" valign="TOP">CHAR, VARCHAR, or LONG VARCHAR
+</td><td align="CENTER" valign="TOP">(0,0), (x,0), or (x,y)
+</td><td align="CENTER" valign="TOP">(0,y)
+</td></tr><tr>
+<td align="LEFT" valign="TOP">BLOB
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(x,0), (0,y), or (x,y)
+</td></tr><tr>
+<td align="LEFT" valign="TOP">CLOB
+</td><td align="CENTER" valign="TOP">(x,0), (x,y)
+</td><td align="CENTER" valign="TOP">(0,0), (0,y)
+</td></tr><tr>
+<td align="LEFT" valign="TOP">GRAPHIC, VARGRAPHIC, LONG VARGRAPHIC, or DBCLOB
+</td><td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">(0,0), (x,0), or (x,y)
+</td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="3">
+<table><tbody><tr><td align="LEFT" valign="TOP"><b>Note:</b></td><td align="LEFT" valign="TOP">x and y are not 0.
+</td></tr></tbody></table>
+</td></tr></tbody></table>
+</p><p></p><p>
+</p><p>
+</p><h3><a name="HDRFORMDT" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_167">PC/IXF Data Type Descriptions</a></h3>
+<a name="IDX2198"></a>
+<a name="IDX2199"></a>
+<br>
+<p><b><a name="TBLFORMIXF">Table 13. Acceptable Data Type Forms for the PC/IXF File Format</a></b><br>
+<table border="">
+<tbody><tr>
+<th align="LEFT" valign="BOTTOM">Data Type
+</th><th align="LEFT" valign="BOTTOM">Form in Files Created by the Export Utility
+</th><th align="LEFT" valign="BOTTOM">Form Acceptable to the Import Utility
+</th></tr><tr>
+<td align="LEFT" valign="TOP">BIGINT
+</td><td align="LEFT" valign="TOP">A BIGINT column, identical to the database column, is created.
+</td><td align="LEFT" valign="TOP">A column in any numeric type (SMALLINT, INTEGER, BIGINT, DECIMAL, or
+FLOAT) is accepted. Individual values are rejected if they are not in
+the range
+-9&nbsp;223&nbsp;372&nbsp;036&nbsp;854&nbsp;775&nbsp;808
+to
+9&nbsp;223&nbsp;372&nbsp;036&nbsp;854&nbsp;775&nbsp;807.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">BLOB
+</td><td align="LEFT" valign="TOP">A PC/IXF BLOB column is created. The maximum length of the
+database column, the SBCS CPGID value, and the DBCS CPGID value are copied to
+the column descriptor record.
+</td><td align="LEFT" valign="TOP">A PC/IXF CHAR, VARCHAR, LONG VARCHAR, BLOB, or BLOB_FILE column is
+acceptable if: 
+<ul>
+<p></p><li>The database column is marked FOR BIT DATA
+<p></p></li><li>The PC/IXF column single-byte code page value equals the SBCS CPGID of
+the database column, and the PC/IXF column double-byte code page value
+equals zero, or the DBCS CPGID of the database column. A PC/IXF
+GRAPHIC, VARGRAPHIC, or LONG VARGRAPHIC BLOB column is also acceptable.
+If the PC/IXF column is of fixed length, its length must be compatible
+with the maximum length of the database column. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</li></ul>
+</td></tr><tr>
+<td align="LEFT" valign="TOP">CHAR
+</td><td align="LEFT" valign="TOP">A PC/IXF CHAR column is created. The database column length,
+the SBCS CPGID value, and the DBCS CPGID value are copied to the PC/IXF
+column descriptor record.
+</td><td align="LEFT" valign="TOP">A PC/IXF CHAR, VARCHAR, or LONG VARCHAR column is acceptable
+if: 
+<ul compact="">
+<li>The database column is marked FOR BIT DATA
+</li><li>The PC/IXF column single-byte code page value equals the SBCS CPGID of
+the database column, and the PC/IXF column double-byte code page value
+equals zero, or the DBCS CPGID of the database column.
+</li></ul>
+<p>A PC/IXF GRAPHIC, VARGRAPHIC, or LONG VARGRAPHIC column is also
+acceptable if the database column is marked FOR BIT DATA. In any case,
+if the PC/IXF column is of fixed length, its length must be compatible
+with the length of the database column. The data is padded on the right
+with single-byte spaces (x'20'), if necessary. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</p></td></tr><tr>
+<td align="LEFT" valign="TOP">CLOB
+</td><td align="LEFT" valign="TOP">A PC/IXF CLOB column is created. The maximum length of the
+database column, the SBCS CPGID value, and the DBCS CPGID value are copied to
+the column descriptor record.
+</td><td align="LEFT" valign="TOP">A PC/IXF CHAR, VARCHAR, LONG VARCHAR, CLOB, or CLOB_FILE column is
+acceptable if the PC/IXF column single-byte code page value equals the
+SBCS CPGID of the database column, and the PC/IXF column double-byte code
+page value equals zero, or the DBCS CPGID of the database column. If
+the PC/IXF column is of fixed length, its length must be compatible with
+the maximum length of the database column. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">DATE
+</td><td align="LEFT" valign="TOP">A DATE column, identical to the database column, is created.
+</td><td align="LEFT" valign="TOP">A PC/IXF column of type DATE is the usual input. The import
+utility also attempts to accept columns in any of the character types, except
+those with incompatible lengths. The character column in the PC/IXF
+file must contain dates in a format consistent with the country code of the
+target database.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">DBCLOB
+</td><td align="LEFT" valign="TOP">A PC/IXF DBCLOB column is created. The maximum length of the
+database column, the SBCS CPGID value, and the DBCS CPGID value are copied to
+the column descriptor record.
+</td><td align="LEFT" valign="TOP">A PC/IXF GRAPHIC, VARGRAPHIC, LONG VARGRAPHIC, DBCLOB, or DBCLOB_FILE
+column is acceptable if the PC/IXF column double-byte code page value
+equals that of the database column. If the PC/IXF column is of
+fixed length, its length must be compatible with the maximum length of the
+database column. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">DECIMAL
+</td><td align="LEFT" valign="TOP">A DECIMAL column, identical to the database column, is created.
+The precision and scale of the column is stored in the column descriptor
+record.
+</td><td align="LEFT" valign="TOP">A column in any numeric type (SMALLINT, INTEGER, BIGINT, DECIMAL, or FLOAT) is accepted. Individual values are
+rejected if they are not in the range of the DECIMAL column into which they
+are being imported.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">FLOAT
+</td><td align="LEFT" valign="TOP">A FLOAT column, identical to the database column, is created.
+</td><td align="LEFT" valign="TOP">A column in any numeric type (SMALLINT, INTEGER, BIGINT, DECIMAL, or FLOAT) is accepted. All values are within
+range.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">GRAPHIC (DBCS only)
+</td><td align="LEFT" valign="TOP">A PC/IXF GRAPHIC column is created. The database column
+length, the SBCS CPGID value, and the DBCS CPGID value are copied to the
+column descriptor record.
+</td><td align="LEFT" valign="TOP">A PC/IXF GRAPHIC, VARGRAPHIC, or LONG VARGRAPHIC column is acceptable
+if the PC/IXF column double-byte code page value equals that of the
+database column. If the PC/IXF column is of fixed length, its
+length must be compatible with the database column length. The data is
+padded on the right with double-byte spaces (x'8140'), if
+necessary. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">INTEGER
+</td><td align="LEFT" valign="TOP">An INTEGER column, identical to the database column, is created.
+</td><td align="LEFT" valign="TOP">A column in any numeric type (SMALLINT, INTEGER, BIGINT, DECIMAL, or FLOAT) is accepted. Individual values are
+rejected if they are not in the range
+-2&nbsp;147&nbsp;483&nbsp;648 to
+2&nbsp;147&nbsp;483&nbsp;647.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">LONG VARCHAR
+</td><td align="LEFT" valign="TOP">A PC/IXF LONG VARCHAR column is created. The maximum length of
+the database column, the SBCS CPGID value, and the DBCS CPGID value are copied
+to the column descriptor record.
+</td><td align="LEFT" valign="TOP">A PC/IXF CHAR, VARCHAR, or LONG VARCHAR column is acceptable
+if: 
+<ul compact="">
+<li>The database column is marked FOR BIT DATA
+</li><li>The PC/IXF column single-byte code page value equals the SBCS CPGID of
+the database column, and the PC/IXF column double-byte code page value
+equals zero, or the DBCS CPGID of the database column.
+</li></ul>
+<p>A PC/IXF GRAPHIC, VARGRAPHIC, or LONG VARGRAPHIC column is also
+acceptable if the database column is marked FOR BIT DATA. In any case,
+if the PC/IXF column is of fixed length, its length must be compatible
+with the maximum length of the database column. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</p></td></tr><tr>
+<td align="LEFT" valign="TOP">LONG VARGRAPHIC (DBCS only)
+</td><td align="LEFT" valign="TOP">A PC/IXF LONG VARGRAPHIC column is created. The maximum length
+of the database column, the SBCS CPGID value, and the DBCS CPGID value are
+copied to the column descriptor record.
+</td><td align="LEFT" valign="TOP">A PC/IXF GRAPHIC, VARGRAPHIC, or LONG VARGRAPHIC column is acceptable
+if the PC/IXF column double-byte code page value equals that of the
+database column. If the PC/IXF column is of fixed length, its
+length must be compatible with the maximum length of the database
+column. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">SMALLINT
+</td><td align="LEFT" valign="TOP">A SMALLINT column, identical to the database column, is created.
+</td><td align="LEFT" valign="TOP">A column in any numeric type (SMALLINT, INTEGER, BIGINT, DECIMAL, or FLOAT) is accepted. Individual values are
+rejected if they are not in the range -32&nbsp;768 to
+32&nbsp;767.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">TIME
+</td><td align="LEFT" valign="TOP">A TIME column, identical to the database column, is created.
+</td><td align="LEFT" valign="TOP">A PC/IXF column of type TIME is the usual input. The import
+utility also attempts to accept columns in any of the character types, except
+those with incompatible lengths. The character column in the PC/IXF
+file must contain time data in a format consistent with the country code of
+the target database.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">TIMESTAMP
+</td><td align="LEFT" valign="TOP">A TIMESTAMP column, identical to the database column, is created.
+</td><td align="LEFT" valign="TOP">A PC/IXF column of type TIMESTAMP is the usual input. The
+import utility also attempts to accept columns in any of the character types,
+except those with incompatible lengths. The character column in the
+PC/IXF file must contain data in the input format for time stamps.
+</td></tr><tr>
+<td align="LEFT" valign="TOP">VARCHAR
+</td><td align="LEFT" valign="TOP">If the maximum length of the database column is &lt;= 254, a
+PC/IXF VARCHAR column is created. If the maximum length of the
+database column is &gt; 254, a PC/IXF LONG VARCHAR column is
+created. The maximum length of the database column, the SBCS CPGID
+value, and the DBCS CPGID value are copied to the column descriptor
+record.
+</td><td align="LEFT" valign="TOP">A PC/IXF CHAR, VARCHAR, or LONG VARCHAR column is acceptable
+if: 
+<ul compact="">
+<li>The database column is marked FOR BIT DATA
+</li><li>The PC/IXF column single-byte code page value equals the SBCS CPGID of
+the database column, and the PC/IXF column double-byte code page value
+equals zero, or the DBCS CPGID of the database column.
+</li></ul>
+<p>A PC/IXF GRAPHIC, VARGRAPHIC, or LONG VARGRAPHIC column is also
+acceptable if the database column is marked FOR BIT DATA. In any case,
+if the PC/IXF column is of fixed length, its length must be compatible
+with the maximum length of the database column. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</p></td></tr><tr>
+<td align="LEFT" valign="TOP">VARGRAPHIC (DBCS only)
+</td><td align="LEFT" valign="TOP">If the maximum length of the database column is &lt;= 127, a
+PC/IXF VARGRAPHIC column is created. If the maximum length of the
+database column is &gt; 127, a PC/IXF LONG VARGRAPHIC column is
+created. The maximum length of the database column, the SBCS CPGID
+value, and the DBCS CPGID value are copied to the column descriptor
+record.
+</td><td align="LEFT" valign="TOP">A PC/IXF GRAPHIC, VARGRAPHIC, or LONG VARGRAPHIC column is acceptable
+if the PC/IXF column double-byte code page value equals that of the
+database column. If the PC/IXF column is of fixed length, its
+length must be compatible with the maximum length of the database
+column. See also the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a>.
+</td></tr></tbody></table>
+</p><p>
+</p><h3><a name="HDRIMRULES" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_168">General Rules Governing PC/IXF File Import into Databases</a></h3>
+<a name="IDX2200"></a>
+<a name="IDX2201"></a>
+<a name="IDX2202"></a>
+<p>The database manager import utility applies the following general rules
+when importing a PC/IXF file in either an SBCS or a DBCS
+environment: 
+</p><ul>
+<p></p><li>The import utility accepts PC/IXF format files only (IXFHID =
+'IXF'). IXF files of other formats cannot be imported.
+<p></p></li><li>The import utility rejects a PC/IXF file with more than 1024
+columns.
+<p></p></li><li>The value of IXFHSBCP in the PC/IXF H record must equal the SBCS
+CPGID, or there must be a conversion table between the IXFHSBCP/IXFHDBCP and
+the SBCS/DBCS CPGID of the target database. The value of IXFHDBCP must
+equal either '00000', or the DBCS CPGID of the target database.
+If either of these conditions is not satisfied, the import utility rejects the
+PC/IXF file, unless the <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a> is specified.
+<a name="IDX2203"></a>
+<p></p></li><li><a name="LICS1"><i>(CS1)</i> </a>Invalid Data Types -- New Table 
+<p>Import of a PC/IXF file into a <i>new</i> table is specified by the
+CREATE or the REPLACE_CREATE keywords in the IMPORT command. If a
+PC/IXF column of an invalid data type (valid data types are defined in <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRIXFDT">PC/IXF Data Types</a>) is selected for import into a new table, the import
+utility terminates. The entire PC/IXF file is rejected, no table is
+created, and no data is imported.
+</p><p></p></li><li>Invalid Data Types -- Existing Table 
+<p>Import of a PC/IXF file into an <i>existing</i> table is specified
+by the INSERT, the INSERT_UPDATE, or the REPLACE_CREATE keywords in the
+IMPORT command. If a PC/IXF column of an invalid data type is
+selected for import into an existing table, one of two actions is
+possible: 
+</p><ul compact="">
+<li>If the target table column is nullable, all values for the invalid
+PC/IXF column are ignored, and the table column values are set to NULL
+</li><li>If the target table column is not nullable, the import utility
+terminates. The entire PC/IXF file is rejected, and no data is
+imported. The existing table remains unaltered.
+</li></ul>
+<p></p></li><li>When importing into a new table, nullable PC/IXF columns generate
+nullable database columns, and not nullable PC/IXF columns generate not
+nullable database columns.
+<p></p></li><li>A not nullable PC/IXF column can be imported into a nullable database
+column.
+<p></p></li><li>A nullable PC/IXF column can be imported into a not nullable database
+column. If a NULL value is encountered in the PC/IXF column, the
+import utility rejects the values of all columns in the PC/IXF row that
+contains the NULL value (the entire row is rejected), and processing continues
+with the next PC/IXF row. That is, no data is imported from a
+PC/IXF row that contains a NULL value if a target table column (for the
+NULL) is not nullable.
+<a name="IDX2204"></a>
+<a name="IDX2205"></a>
+<p></p></li><li><a name="LICS2"><i>(CS2)</i> </a>Incompatible Columns -- New Table 
+<p>If, during import to a <i>new</i> database table, a PC/IXF column
+is selected that is incompatible with the target database column, the import
+utility terminates. The entire PC/IXF file is rejected, no table is
+created, and no data is imported. 
+<table><tbody><tr><td align="LEFT" valign="TOP"><b>Note:</b></td><td align="LEFT" valign="TOP">The IMPORT <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a> extends the scope of compatible columns.
+</td></tr></tbody></table>
+</p><p></p></li><li>Incompatible Columns -- Existing Table 
+<p>If, during import to an <i>existing</i> database table, a PC/IXF
+column is selected that is incompatible with the target database column, one
+of two actions is possible: 
+</p><ul compact="">
+<li>If the target table column is nullable, all values for the PC/IXF
+column are ignored, and the table column values are set to NULL
+</li><li>If the target table column is not nullable, the import utility
+terminates. The entire PC/IXF file is rejected, and no data is
+imported. The existing table remains unaltered.
+</li></ul>
+<table><tbody><tr><td align="LEFT" valign="TOP"><b>Note:</b></td><td align="LEFT" valign="TOP">The IMPORT <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a> extends the scope of compatible columns.
+</td></tr></tbody></table>
+<a name="IDX2206"></a>
+<a name="IDX2207"></a>
+<a name="IDX2208"></a>
+<p></p></li><li><a name="LICS"><i>(CS)</i> </a>Invalid Values 
+<p>If, during import, a PC/IXF column value is encountered that is not
+valid for the target database column, the import utility rejects the values of
+all columns in the PC/IXF row that contains the invalid value (the entire
+row is rejected), and processing continues with the next PC/IXF
+row.
+</p></li></ul>
+<p>
+</p><h3><a name="Header_169" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_169">Data Type-Specific Rules Governing PC/IXF File Import into Databases</a></h3>
+<a name="IDX2209"></a>
+<a name="IDX2210"></a>
+<a name="IDX2211"></a>
+<ul>
+<p></p><li>A valid PC/IXF numeric column can be imported into any compatible
+numeric database column. PC/IXF columns containing 4-byte floating
+point data are not imported, because this is an invalid data type.
+<p></p></li><li>Database date/time columns can accept values from matching PC/IXF
+date/time columns (DATE, TIME, and TIMESTAMP), as well as from PC/IXF
+character columns (CHAR, VARCHAR, and LONG VARCHAR), subject to column length
+and value compatibility restrictions.
+<p></p></li><li>A valid PC/IXF character column (CHAR, VARCHAR, or LONG VARCHAR) can
+always be imported into an <i>existing</i> database character column
+marked FOR BIT DATA; otherwise: 
+<ul>
+<p></p><li>IXFCSBCP and the SBCS CPGID must agree
+<p></p></li><li>There must be a conversion table for the IXFCSBCP/IXFCDBCP and the
+SBCS/DBCS
+<p></p></li><li>One set must be all zeros (FOR BIT DATA).
+</li></ul>
+<p>If IXFCSBCP is not zero, the value of IXFCDBCP must equal either zero or
+the DBCS CPGID of the target database column. 
+</p><p>If either of these conditions is not satisfied, the PC/IXF and database
+columns are incompatible. 
+</p><p>When importing a valid PC/IXF character column into a <i>new</i>
+database table, the value of IXFCSBCP must equal either zero or the SBCS CPGID
+of the database, or there must be a conversion table. If IXFCSBCP is
+zero, IXFCDBCP must also be zero (otherwise the PC/IXF column is an
+invalid data type); IMPORT creates a character column marked FOR BIT DATA in
+the new table. If IXFCSBCP is not zero, and equals the SBCS CPGID of
+the database, the value of IXFCDBCP must equal either zero or the DBCS CPGID
+of the database; in this case, the utility creates a character column in the
+new table with SBCS and DBCS CPGID values equal to those of the
+database. If these conditions are not satisfied, the PC/IXF and
+database columns are incompatible. 
+</p><p>The <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a> can be used to override code page equality checks.
+However, a PC/IXF character column with IXFCSBCP equal to zero and
+IXFCDBCP not equal to zero is an invalid data type, and cannot be imported,
+even if FORCEIN is specified.
+</p><p></p></li><li>A valid PC/IXF graphic column (GRAPHIC, VARGRAPHIC, or LONG
+VARGRAPHIC) can always be imported into an <i>existing</i> database
+character column marked FOR BIT DATA, but is incompatible with all other
+database columns. The <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEIN">FORCEIN Option</a> can be used to relax this restriction. However, a
+PC/IXF graphic column with IXFCSBCP not equal to zero, or IXFCDBCP equal
+to zero, is an invalid data type, and cannot be imported, even if FORCEIN is
+specified. 
+<p>When importing a valid PC/IXF graphic column into a database graphic
+column, the value of IXFCDBCP must equal the DBCS CPGID of the target database
+column (that is, the double-byte code pages of the two columns must
+agree).
+</p><p></p></li><li>If, during import of a PC/IXF file into an existing database table, a
+fixed-length string column (CHAR or GRAPHIC) is selected whose length is
+greater than the maximum length of the target column, the columns are
+incompatible.
+<p></p></li><li>If, during import of a PC/IXF file into an existing database table, a
+variable-length string column (VARCHAR, LONG VARCHAR, VARGRAPHIC, or LONG
+VARGRAPHIC) is selected whose length is greater than the maximum length of the
+target column, the columns <i>are</i> compatible. Individual values
+are processed according to the compatibility rules governing the database
+manager INSERT statement, and PC/IXF values which are too long for the
+target database column are invalid.
+<p></p></li><li>PC/IXF values imported into a fixed-length database
+<i>character</i> column (that is, a CHAR column) are padded on the right
+with single-byte spaces (0x20), if necessary, to obtain values whose length
+equals that of the database column. PC/IXF values imported into a
+fixed-length database <i>graphic</i> column (that is, a GRAPHIC column)
+are padded on the right with double-byte spaces (0x8140), if necessary, to
+obtain values whose length equals that of the database column.
+<p></p></li><li>Since PC/IXF VARCHAR columns have a maximum length of 254 bytes, a
+database VARCHAR column of maximum length <i>n</i>, with 254 &lt;
+<i>n</i> &lt; 4001, must be exported into a PC/IXF LONG VARCHAR column
+of maximum length <i>n</i>.
+<p></p></li><li>Although PC/IXF LONG VARCHAR columns have a maximum length of
+32&nbsp;767 bytes, and database LONG VARCHAR columns have a maximum
+length restriction of 32&nbsp;700 bytes, PC/IXF LONG VARCHAR columns
+of length greater than 32&nbsp;700 bytes (but less than 32&nbsp;768
+bytes) are still valid, and can be imported into database LONG VARCHAR
+columns, but data may be lost.
+<p></p></li><li>Since PC/IXF VARGRAPHIC columns have a maximum length of 127 bytes, a
+database VARGRAPHIC column of maximum length <i>n</i>, with 127 &lt;
+<i>n</i> &lt; 2001, must be exported into a PC/IXF LONG VARGRAPHIC
+column of maximum length <i>n</i>.
+<p></p></li><li>Although PC/IXF LONG VARGRAPHIC columns have a maximum length of
+16&nbsp;383 bytes, and database LONG VARGRAPHIC columns have a maximum
+length restriction of 16&nbsp;350, PC/IXF LONG VARGRAPHIC columns of
+length greater than 16&nbsp;350 bytes (but less than 16&nbsp;384
+bytes) are still valid, and can be imported into database LONG VARGRAPHIC
+columns, but data may be lost.
+</li></ul>
+<p><a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#TBLTABUFF2">Table 14</a> summarizes PC/IXF file import into new or existing
+database tables without the FORCEIN option.
+<br>
+</p><p><b><a name="TBLTABUFF2">Table 14. Summary of PC/IXF File Import without FORCEIN Option</a></b><br>
+<table border="">
+<tbody><tr>
+<th align="LEFT" valign="BOTTOM" rowspan="3">PC/IXF COLUMN DATA TYPE
+</th><th align="CENTER" valign="BOTTOM" colspan="12">DATABASE COLUMN DATA TYPE
+</th></tr><tr><th align="CENTER" valign="BOTTOM" colspan="5">NUMERIC
+</th><th align="CENTER" valign="BOTTOM" colspan="3">CHARACTER
+</th><th align="CENTER" valign="BOTTOM">GRAPH
+</th><th align="CENTER" valign="BOTTOM" colspan="3">DATETIME
+</th></tr><tr><th align="CENTER" valign="BOTTOM">SMALL INT
+</th><th align="CENTER" valign="BOTTOM">INT
+</th><th align="CENTER" valign="BOTTOM">BIGINT
+</th><th align="CENTER" valign="BOTTOM">DEC
+</th><th align="CENTER" valign="BOTTOM">FLT
+</th><th align="CENTER" valign="BOTTOM">(0,0)
+</th><th align="CENTER" valign="BOTTOM">(SBCS, 0)<sup>d</sup>
+</th><th align="CENTER" valign="BOTTOM">(SBCS, DBCS)<sup>b</sup>
+</th><th align="CENTER" valign="BOTTOM"><sup>b</sup>
+</th><th align="CENTER" valign="BOTTOM">DATE
+</th><th align="CENTER" valign="BOTTOM">TIME
+</th><th align="CENTER" valign="BOTTOM">TIME STAMP
+</th></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Numeric
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-SMALLINT
+</td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="LEFT" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-INTEGER
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="LEFT" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-BIGINT
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="LEFT" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-DECIMAL
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-FLOAT
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Character
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-(0,0)
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-(SBCS,0)
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-(SBCS, DBCS)
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Graphic
+</td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Datetime
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-DATE
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-TIME
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-TIME STAMP
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">
+<p><b>Notes: </b></p><ol compact="">
+<li>The table is a matrix of all valid PC/IXF and database manager data
+types. If a PC/IXF column can be imported into a database column, a
+letter is displayed in the matrix cell at the intersection of the PC/IXF
+data type matrix row and the database manager data type matrix column.
+An 'N' indicates that the utility is creating a new database table (a
+database column of the indicated data type is created). An 'E'
+indicates that the utility is importing data to an existing database table (a
+database column of the indicated data type is a valid target).
+</li><li>Character string data types are distinguished by code page
+attributes. These attributes are shown as an ordered pair (SBCS,DBCS),
+where: 
+<ul compact="">
+<li>SBCS is either zero or denotes a nonzero value of the single-byte code
+page attribute of the character data type
+</li><li>DBCS is either zero or denotes a nonzero value of the double-byte code
+page attribute of the character data type.
+</li></ul>
+</li><li>If the table indicates that a PC/IXF character column can be imported
+into a database character column, the values of their respective code page
+attribute pairs satisfy the rules governing code page equality.
+</li></ol> 
+<p><sup>a</sup> Individual values are rejected if they are out of range for
+the target numeric data type. 
+</p><p><sup>b</sup> Data type is available only in DBCS environments. 
+</p><p><sup>c</sup> Individual values are rejected if they are not valid date or
+time values. 
+</p><p><sup>d</sup> Data type is not available in DBCS environments.
+<br></p></td></tr></tbody></table>
+</p><p>
+</p><h3><a name="HDRFORCEIN" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_170">FORCEIN Option</a></h3>
+<a name="IDX2212"></a>
+<a name="IDX2213"></a>
+<p>The FORCEIN option permits import of a PC/IXF file despite code page
+differences between data in the PC/IXF file and the target
+database. It offers additional flexibility in the definition of
+compatible columns.
+</p><p>
+</p><h4><a name="Header_171">FORCEIN General Semantics</a></h4>
+<a name="IDX2214"></a>
+<a name="IDX2215"></a>
+<p>The following general semantics apply when using the FORCEIN option in
+either an SBCS or a DBCS environment: 
+</p><ul>
+<p></p><li>The FORCEIN option should be used with caution. It is usually
+advisable to attempt an import without this option enabled. However,
+because of the generic nature of the PC/IXF data interchange architecture,
+some PC/IXF files may contain data types or values that cannot be imported
+without intervention.
+<p></p></li><li>Import with FORCEIN to a <i>new</i> table may yield a different result
+than import to an existing table. An existing table has predefined
+target data types for each PC/IXF data type.
+<p></p></li><li>When LOB data is exported with the LOBSINFILE option, and the files move
+to another client with a different code page, then, unlike other data, the
+CLOBS and DBCLOBS in the separate files are not converted to the client code
+page when imported or loaded into a database.
+</li></ul>
+<p>
+</p><h4><a name="Header_172">FORCEIN Code Page Semantics</a></h4>
+<a name="IDX2216"></a>
+<a name="IDX2217"></a>
+<p>The following code page semantics apply when using the FORCEIN option in
+either an SBCS or a DBCS environment: 
+</p><ul>
+<p></p><li>The FORCEIN option disables all import utility code page
+comparisons. 
+<p>This rule applies to code page comparisons at the column level and at the
+file level as well, when importing to a new or an existing database
+table. At the column (for example, data type) level, this rule applies
+only to the following database manager and PC/IXF data types:
+character (CHAR, VARCHAR, and LONG VARCHAR), and graphic (GRAPHIC, VARGRAPHIC,
+and LONG VARGRAPHIC). The restriction follows from the fact that code
+page attributes of other data types are not relevant to the interpretation of
+data type values.
+</p><p></p></li><li>The FORCEIN option does not disable inspection of code page attributes to
+determine data types. 
+<p>For example, the database manager allows a CHAR column to be declared with
+the FOR BIT DATA attribute. Such a declaration sets both the SBCS CPGID
+and the DBCS CPGID of the column to zero; it is the zero value of these CPGIDs
+that identifies the column values as bit strings (rather than character
+strings).
+</p><p></p></li><li>The FORCEIN option does not imply code page translation. 
+<p>Values of data types that are sensitive to the FORCEIN option are copied
+"as is". No code point mappings are employed to account for a
+change of code page environments. Padding of the imported value with
+spaces may be necessary in the case of fixed length target columns.
+</p><p></p></li><li>When data is imported to an <i>existing</i> table using the FORCEIN
+option: 
+<ul compact="">
+<li>The code page value of the target database table and columns always
+prevails.
+</li><li>The code page value of the PC/IXF file and columns is ignored.
+</li></ul>
+<p>
+</p><p>This rule applies whether or not the FORCEIN option is used. The
+database manager does not permit changes to a database or a column code page
+value once a database is created.
+</p><p></p></li><li>When importing to a <i>new</i> table using the FORCEIN option: 
+<ul compact="">
+<li>The code page value of the target database prevails.
+</li><li>PC/IXF character columns with IXFCSBCP = IXFCDBCP = 0 generate table
+columns marked FOR BIT DATA.
+</li><li>All other PC/IXF character columns generate table character columns
+with SBCS and DBCS CPGID values equal to those of the database.
+</li><li>PC/IXF graphic columns generate table graphic columns with an SBCS
+CPGID of "undefined", and a DBCS CPGID equal to that of the database
+(DBCS environment only).
+</li></ul>
+</li></ul>
+<p><b>FORCEIN Example</b>
+<a name="IDX2218"></a>
+<a name="IDX2219"></a>
+</p><p>Consider a PC/IXF CHAR column with IXFCSBCP = '00897' and
+IXFCDBCP = '00301'. This column is to be imported into a
+database CHAR column whose SBCS CPGID = '00850' and DBCS CPGID =
+'00000'. Without FORCEIN, the utility terminates, and no data
+is imported, or the PC/IXF column values are ignored, and the database
+column contains NULLs (if the database column is nullable). With
+FORCEIN, the utility proceeds, ignoring code page incompatibilities. If
+there are no other data type incompatibilities (such as length, for example),
+the values of the PC/IXF column are imported "as is", and become
+available for interpretation under the database column code page
+environment.
+</p><p>The following table shows: 
+</p><ul>
+<p></p><li>The code page attributes of a column created in a <i>new</i> database
+table when a PC/IXF file data type with specified code page attributes is
+imported
+<p></p></li><li>That the import utility rejects PC/IXF data types if they invalid or
+incompatible.
+</li></ul>
+<br>
+<p><b><a name="TBLTABUFF3">Table 15. Summary of Import Utility Code Page Semantics (New Table)</a></b><br>
+<table border="">
+<tbody><tr>
+<td align="LEFT" valign="TOP" colspan="3">This table assumes there is no conversion table between a and x.
+If there were, items 3 and 4 would work successfully without the FORCEIN
+option.
+</td></tr><tr>
+<th align="CENTER" valign="BOTTOM" rowspan="2">CODE PAGE ATTRIBUTES of PC/IXF DATA TYPE
+</th><th align="CENTER" valign="BOTTOM" colspan="2">CODE PAGE ATTRIBUTES OF DATABASE TABLE COLUMN
+</th></tr><tr><th align="CENTER" valign="BOTTOM">Without FORCEIN
+</th><th align="CENTER" valign="BOTTOM">With FORCEIN
+</th></tr><tr>
+<td align="LEFT" valign="TOP" colspan="3">SBCS
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,0)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(a,0)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,y)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(a,0)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,y)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(a,0)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(0,0)
+</td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="3">DBCS
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,0)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(a,b)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,y)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(a,b)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,y)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(a,b)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,b)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(a,b)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,b)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">reject
+</td><td align="CENTER" valign="TOP">(-,b)
+</td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="3">
+<p><b>Notes: </b></p><ol compact="">
+<li>Code page attributes of a PC/IXF data type are shown as an ordered
+pair, where x represents a nonzero single-byte code page value, and y
+represents a nonzero double-byte code page value. A '-'
+represents an undefined code page value.
+</li><li>The use of different letters in various code page attribute pairs is
+deliberate. Different letters imply different values. For
+example, if a PC/IXF data type is shown as (x,y), and the database column
+as (a,y), x does not equal a, but the PC/IXF file and the database have
+the same double-byte code page value y.
+</li><li>Only character and graphic data types are affected by the FORCEIN code
+page semantics.
+</li><li>It is assumed that the database containing the new table has code page
+attributes of (a,0); therefore, all character columns in the new table must
+have code page attributes of either (0,0) or (a,0). 
+<p>In a DBCS environment, it is assumed that the database containing the new
+table has code page attributes of (a,b); therefore, all graphic columns in the
+new table must have code page attributes of (-,b), and all character columns
+must have code page attributes of (a,b). The SBCS CPGID is shown as
+'-', because it is undefined for graphic data types.
+</p></li><li>The data type of the result is determined by the rules described in <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRFORCEDT">FORCEIN Data Type Semantics</a>.
+</li><li>The <tt>reject</tt> result is a reflection of the rules for invalid or
+incompatible data types (see <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRIMRULES">General Rules Governing PC/IXF File Import into Databases</a>).
+</li></ol>
+<br></td></tr></tbody></table>
+</p><p></p><p>
+</p><p>The following table shows: 
+</p><ul>
+<p></p><li>That the import utility accepts PC/IXF data types with various code
+page attributes into an <i>existing</i> table column (the
+<i>target</i> column) having the specified code page attributes
+<p></p></li><li>That the import utility does not permit a PC/IXF data type with
+certain code page attributes to be imported into an <i>existing</i> table
+column having the code page attributes shown. The utility rejects
+PC/IXF data types if they are invalid or incompatible.
+</li></ul>
+<br>
+<p><b><a name="TBLTABUFF4">Table 16. Summary of Import Utility Code Page Semantics (Existing Table)</a></b><br>
+<table border="">
+<tbody><tr>
+<td align="LEFT" valign="TOP" colspan="4">This table assumes there is no conversion table between a and x.
+</td></tr><tr>
+<th align="CENTER" valign="BOTTOM" rowspan="2">CODE PAGE ATTRIBUTES OF PC/IXF DATA TYPE
+</th><th align="CENTER" valign="BOTTOM" rowspan="2">CODE PAGE ATTRIBUTES OF TARGET DATABASE COLUMN
+</th><th align="CENTER" valign="BOTTOM" colspan="2">RESULTS OF IMPORT
+</th></tr><tr><th align="CENTER" valign="BOTTOM">Without FORCEIN
+</th><th align="CENTER" valign="BOTTOM">With FORCEIN
+</th></tr><tr>
+<td align="LEFT" valign="TOP" colspan="4">SBCS
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,y)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,y)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,0)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,y)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,y)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="4">DBCS
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,0)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,y)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,y)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,b)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,b)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,0)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,y)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,y)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,b)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,b)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="CENTER" valign="TOP">(0,0)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,0)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,0)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,b)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,y)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(a,y)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(x,b)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">null or reject
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,b)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">accept
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="CENTER" valign="TOP">(0,y)
+</td><td align="CENTER" valign="TOP">(-,b)
+</td><td align="CENTER" valign="TOP">null or reject
+</td><td align="CENTER" valign="TOP">accept
+</td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="4">
+<p><b>Notes: </b></p><ol compact="">
+<li>See the notes for <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#TBLTABUFF3">Table 15</a>.
+</li><li>The <tt>null or reject</tt> result is a reflection of the rules for
+invalid or incompatible data types (see <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRIMRULES">General Rules Governing PC/IXF File Import into Databases</a>).
+</li></ol>
+<br></td></tr></tbody></table>
+</p><p>
+</p><h4><a name="HDRFORCEDT">FORCEIN Data Type Semantics</a></h4>
+<a name="IDX2220"></a>
+<a name="IDX2221"></a>
+<p>The FORCEIN option permits import of certain PC/IXF columns into target
+database columns of unequal and otherwise incompatible data types. The
+following data type semantics apply when using the FORCEIN option in either an
+SBCS or a DBCS environment (except where noted): 
+</p><ul>
+<p></p><li>In SBCS environments, the FORCEIN option permits import of: 
+<ul compact="">
+<li>A PC/IXF BIT data type (IXFCSBCP = 0 = IXFCDBCP for a PC/IXF
+character column) into a database character column (nonzero SBCS CPGID, and
+DBCS CPGID = 0); existing tables only
+</li><li>A PC/IXF MIXED data type (nonzero IXFCSBCP and IXFCDBCP) into a
+database character column; both new and existing tables
+</li><li>A PC/IXF GRAPHIC data type into a database FOR BIT DATA column (SBCS
+CPGID = 0 = DBCS CPGID); new tables only (this is always permitted for
+existing tables).
+</li></ul>
+<p></p></li><li>The FORCEIN option does not extend the scope of valid PC/IXF data
+types. 
+<p>PC/IXF columns with data types not defined as valid in <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#HDRIXFDT">PC/IXF Data Types</a> are invalid for import with or without the FORCEIN
+option.
+</p><p></p></li><li>In DBCS environments, the FORCEIN option permits import of: 
+<ul compact="">
+<li>A PC/IXF BIT data type into a database character column
+</li><li>A PC/IXF BIT data type into a database graphic column; however, if the
+PC/IXF BIT column is of fixed length, that length must be even. A
+fixed length PC/IXF BIT column of odd length is not compatible with a
+database graphic column. A varying-length PC/IXF BIT column
+<i>is</i> compatible whether its length is odd or even, although an
+odd-length value from a varying-length column is an invalid value for import
+into a database graphic column
+</li><li>A PC/IXF MIXED data type into a database character column.
+</li></ul>
+</li></ul>
+<p><a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#TBLTABUFF7">Table 17</a> summarizes PC/IXF file import into new or existing
+database tables with the FORCEIN option.
+<a name="IDX2222"></a>
+<a name="IDX2223"></a>
+<a name="IDX2224"></a>
+<br>
+</p><p><b><a name="TBLTABUFF7">Table 17. Summary of PC/IXF File Import with FORCEIN Option</a></b><br>
+<table border="">
+<tbody><tr>
+<th align="LEFT" valign="BOTTOM" rowspan="3">PC/IXF COLUMN DATA TYPE
+</th><th align="CENTER" valign="BOTTOM" colspan="12">DATABASE COLUMN DATA TYPE
+</th></tr><tr><th align="CENTER" valign="BOTTOM" colspan="5">NUMERIC
+</th><th align="CENTER" valign="BOTTOM" colspan="3">CHARACTER
+</th><th align="CENTER" valign="BOTTOM">GRAPH
+</th><th align="CENTER" valign="BOTTOM" colspan="3">DATETIME
+</th></tr><tr><th align="CENTER" valign="BOTTOM">SMALL INT
+</th><th align="CENTER" valign="BOTTOM">INT
+</th><th align="CENTER" valign="BOTTOM">BIGINT
+</th><th align="CENTER" valign="BOTTOM">DEC
+</th><th align="CENTER" valign="BOTTOM">FLT
+</th><th align="CENTER" valign="BOTTOM">(0,0)
+</th><th align="CENTER" valign="BOTTOM">(SBCS, 0)<sup>e</sup>
+</th><th align="CENTER" valign="BOTTOM">(SBCS, DBCS)<sup>b</sup>
+</th><th align="CENTER" valign="BOTTOM"><sup>b</sup>
+</th><th align="CENTER" valign="BOTTOM">DATE
+</th><th align="CENTER" valign="BOTTOM">TIME
+</th><th align="CENTER" valign="BOTTOM">TIME STAMP
+</th></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Numeric
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-SMALLINT
+</td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="LEFT" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-INTEGER
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="LEFT" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-BIGINT
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="LEFT" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-DECIMAL
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-FLOAT
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E<sup>a</sup>
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Character
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-(0,0)
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E w/F
+</td><td align="CENTER" valign="TOP">E w/F
+</td><td align="CENTER" valign="TOP">E w/F
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-(SBCS,0)
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-(SBCS, DBCS)
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N w/F<sup>d</sup>
+</td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td><td align="CENTER" valign="TOP">E<sup>c</sup>
+</td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">E w/F
+</td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Graphic
+</td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N w/F<sup>d</sup>
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">Datetime
+</td></tr><tr>
+<td align="LEFT" valign="TOP">-DATE
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-TIME
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td><td align="CENTER" valign="TOP">
+<br></td></tr><tr>
+<td align="LEFT" valign="TOP">-TIME STAMP
+</td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">N
+</td></tr><tr>
+<td align="LEFT" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">
+<br></td><td align="CENTER" valign="TOP">E
+</td></tr><tr>
+<td align="LEFT" valign="TOP" colspan="13">
+<table><tbody><tr><td align="LEFT" valign="TOP"><b>Note:</b></td><td align="LEFT" valign="TOP">If a PC/IXF column can be imported into a database column only with the
+FORCEIN option, the string 'w/F' is displayed together with an
+'N' or an 'E'. An 'N' indicates that the
+utility is creating a new database table; an 'E' indicates that the
+utility is importing data to an existing database table. The FORCEIN
+option affects compatibility of character and graphic data types only.
+</td></tr></tbody></table> 
+<p><sup>a</sup> Individual values are rejected if they are out of range for
+the target numeric data type. 
+</p><p><sup>b</sup> Data type is available only in DBCS environments. 
+</p><p><sup>c</sup> Individual values are rejected if they are not valid date or
+time values. 
+</p><p><sup>d</sup> Applies only if the source PC/IXF data type is not
+supported by the target database. 
+</p><p><sup>e</sup> Data type is not available in DBCS environments.
+</p></td></tr></tbody></table>
+</p><p>
+</p><h3><a name="HDRIXFDEV" href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC_174">Differences between Version 1 PC/IXF and Version 0 System/370 IXF</a></h3>
+<a name="IDX2225"></a>
+<a name="IDX2226"></a>
+<a name="IDX2227"></a>
+<a name="IDX2228"></a>
+<p>The following describes differences between Version 1 PC/IXF, used by
+the database manager, and Version 0 System/370 IXF, used by several host
+database products: 
+</p><ul>
+<p></p><li>PC/IXF files are ASCII, rather than EBCDIC oriented. PC/IXF
+files have significantly expanded code page identification, including new code
+page identifiers in the H record, and the use of actual code page values in
+the column descriptor records. There is also a mechanism for marking
+columns of character data as FOR BIT DATA. FOR BIT DATA columns are of
+special significance, because transforms which convert a PC/IXF file
+format to or from any other IXF or database file format cannot perform any
+code page translation on the values contained in FOR BIT DATA columns.
+<p></p></li><li>Only the machine data form is permitted; that is, the IXFTFORM field must
+always contain the value <tt>M</tt>. Furthermore, the machine data
+must be in PC forms; that is, the IXFTMFRM field must contain the value
+<tt>PC</tt>. This means that integers, floating point numbers, and
+decimal numbers in data portions of PC/IXF data records must be in PC
+forms.
+<p></p></li><li>Application (A) records are permitted anywhere after the H record in a
+PC/IXF file. They are not counted when the value of the IXFHHCNT
+field is computed.
+<p></p></li><li>Every PC/IXF record begins with a record length indicator. This
+is a 6-byte character representation of an integer value containing the
+length, in bytes, of the PC/IXF record not including the record length
+indicator itself; that is, the total record length minus 6 bytes. The
+purpose of the record length field is to enable PC programs to identify record
+boundaries.
+<p></p></li><li>To facilitate the compact storage of variable-length data, and to avoid
+complex processing when a field is split into multiple records, PC/IXF
+does not support Version 0 IXF X records, but does support D record
+identifiers. Whenever a variable-length field or a nullable field is
+the last field in a data D record, it is not necessary to write the entire
+maximum length of the field to the PC/IXF file.
+</li></ul>
+<p></p><hr><b>[ <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0164.htm#Top_Of_Page">Top of Page</a> | <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0163.htm">Previous Page</a> | <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0165.htm">Next Page</a> | <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n003.htm#ToC">Table of Contents</a> | <a href="https://www1.columbia.edu/sec/acis/db2/db2n0/db2n0175.htm#HDRINDEX_START">Index</a> ]</b> 
+<!-- Begin Footer Records  ========================================== -->
+<p><b>[ <a href="https://www1.columbia.edu/sec/acis/db2/index.htm">DB2 List of Books</a> | 
+<a href="https://www1.columbia.edu/sec/acis/db2/db2srch.htm">Search the DB2 Books</a> ]</b> 
+<!-- End Footer Records  ============================================ -->
+<a name="Bot_Of_Page"></a>
+
+</p><script src="chrome-extension://hhojmcideegachlhfgfdhailpfhgknjm/web_accessible_resources/index.js"></script></body></html>
